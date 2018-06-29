@@ -13,7 +13,7 @@ using System.Linq;
 namespace AzureFunctionsTodo
 {
 
-    public static class TodoApi
+    public static class TodoApiInMemory
     {
         static List<Todo> items = new List<Todo>();
 
