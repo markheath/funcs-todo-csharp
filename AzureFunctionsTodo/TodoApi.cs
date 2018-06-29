@@ -22,8 +22,9 @@ namespace AzureFunctionsTodo
         {
             log.Info("Creating a new todo list item");
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var todo = JsonConvert.DeserializeObject<Todo>(requestBody);
+            var input = JsonConvert.DeserializeObject<TodoCreateModel>(requestBody);
 
+            var todo = new Todo() { TaskDescription = input.TaskDescription };
             items.Add(todo);
             return new OkObjectResult(todo);
         }
@@ -56,10 +57,13 @@ namespace AzureFunctionsTodo
             }
 
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var updated = JsonConvert.DeserializeObject<Todo>(requestBody);
+            var updated = JsonConvert.DeserializeObject<TodoUpdateModel>(requestBody);
 
             todo.IsCompleted = updated.IsCompleted;
-            todo.TaskDescription = updated.TaskDescription;
+            if (!string.IsNullOrEmpty(updated.TaskDescription))
+            {
+                todo.TaskDescription = updated.TaskDescription;
+            }
 
             return new OkObjectResult(todo);
         }
