@@ -17,7 +17,7 @@ namespace AzureFunctionsTodo
     {
         static List<Todo> items = new List<Todo>();
 
-        [FunctionName("CreateTodo")]
+        [FunctionName("InMemory_CreateTodo")]
         public static async Task<IActionResult>CreateTodo([HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "todo")]HttpRequest req, TraceWriter log)
         {
             log.Info("Creating a new todo list item");
@@ -29,14 +29,14 @@ namespace AzureFunctionsTodo
             return new OkObjectResult(todo);
         }
 
-        [FunctionName("GetTodos")]
+        [FunctionName("InMemory_GetTodos")]
         public static IActionResult GetTodos([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "todo")]HttpRequest req, TraceWriter log)
         {
             log.Info("Getting todo list items");
             return new OkObjectResult(items);
         }
 
-        [FunctionName("GetTodoById")]
+        [FunctionName("InMemory_GetTodoById")]
         public static IActionResult GetTodoById([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "todo/{id}")]HttpRequest req, TraceWriter log, string id)
         {
             var todo = items.FirstOrDefault(t => t.Id == id);
@@ -47,7 +47,7 @@ namespace AzureFunctionsTodo
             return new OkObjectResult(todo);
         }
 
-        [FunctionName("UpdateTodo")]
+        [FunctionName("InMemory_UpdateTodo")]
         public static async Task<IActionResult> UpdateTodo([HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "todo/{id}")]HttpRequest req, TraceWriter log, string id)
         {
             var todo = items.FirstOrDefault(t => t.Id == id);
@@ -68,7 +68,7 @@ namespace AzureFunctionsTodo
             return new OkObjectResult(todo);
         }
 
-        [FunctionName("DeleteTodo")]
+        [FunctionName("InMemory_DeleteTodo")]
         public static IActionResult DeleteTodo([HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "todo/{id}")]HttpRequest req, TraceWriter log, string id)
         {
             var todo = items.FirstOrDefault(t => t.Id == id);
