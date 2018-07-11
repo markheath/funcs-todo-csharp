@@ -98,8 +98,8 @@ namespace AzureFunctionsTodo
             return new OkObjectResult(existingTodo);
         }
 
-        [FunctionName("Blob_DeleteTodo")] // n.b. strange issue if this function is just called DeleteTodo - causes functions runtime to fall over
-        public static async Task<IActionResult> DeleteTodo3(
+        [FunctionName("Blob_DeleteTodo")]
+        public static async Task<IActionResult> DeleteTodo(
             [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = route + "/{id}")]HttpRequest req,
             [Blob("todos/{id}.json", Connection = "AzureWebJobsStorage")] CloudBlockBlob blob,
             TraceWriter log, string id)

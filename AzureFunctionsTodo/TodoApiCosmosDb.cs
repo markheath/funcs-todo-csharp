@@ -39,7 +39,7 @@ namespace AzureFunctionsTodo
         }
 
         [FunctionName("CosmosDb_GetTodos")]
-        public static async Task<IActionResult> GetTodos(
+        public static IActionResult GetTodos(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = route)]HttpRequest req,
             [CosmosDB(
                 databaseName: "tododb",

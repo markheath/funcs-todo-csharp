@@ -90,8 +90,8 @@ namespace AzureFunctionsTodo
             return new OkObjectResult(existingRow.ToTodo());
         }
 
-        [FunctionName("Table_DeleteTodo")] // n.b. strange issue if this function is just called DeleteTodo - causes functions runtime to fall over
-        public static async Task<IActionResult> DeleteTodo2(
+        [FunctionName("Table_DeleteTodo")]
+        public static async Task<IActionResult> DeleteTodo(
             [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = route + "/{id}")]HttpRequest req,
             [Table("todos", Connection = "AzureWebJobsStorage")] CloudTable todoTable,
             TraceWriter log, string id)
