@@ -8,7 +8,6 @@ using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.WindowsAzure.Storage.Table;
-using System;
 using Microsoft.WindowsAzure.Storage;
 
 namespace AzureFunctionsTodo
