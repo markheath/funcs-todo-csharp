@@ -1,6 +1,6 @@
 ### Azure Functions C# Bindings Sample
 
-A simple CRUD (Create, Read, Update, Delete) API is created to manage TODO items, using the following options as backing store:
+This project contains a simple CRUD (Create, Read, Update, Delete) REST API to manage TODO items, using the following options as backing store:
 
 - In-memory implementation
 - Blob storage
@@ -8,11 +8,11 @@ A simple CRUD (Create, Read, Update, Delete) API is created to manage TODO items
 - Cosmos DB
 - Entity Framework Core
 
-It's implemented using Azure Functions V2 in C#, and can be run against the local storage emulator for table storage, and the CosmosDb emulator.
+It's implemented using Azure Functions V2 in C#, and can be run against the local storage emulator for Table or Blob storage, and the Cosmos DB emulator.
 
 ### Get set up
 
-You'll need to set up a `local.settings.json` file containing connection strings for the Azure Storage and Azure CosmosDb emulators. 
+You'll need to set up a `local.settings.json` file containing connection strings for the Azure Storage and Azure CosmosDb emulators. There's a `local.settings.json.sample` file you can rename as a starting point.
 
 ```js
 {
@@ -27,7 +27,7 @@ You'll need to set up a `local.settings.json` file containing connection strings
 }
 ```
 
-To test the EF option, run the `TodoTable.sql` script to create the necessary table
+To test the EF backing store, create a new `Todos` database and then run the `TodoTable.sql` SQL script against it to create the necessary table.
 
 ### Testing Locally
 
