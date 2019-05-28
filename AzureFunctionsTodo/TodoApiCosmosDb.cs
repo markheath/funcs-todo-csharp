@@ -3,32 +3,34 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 using System.Linq;
 using System;
 using System.Collections.Generic;
 using Microsoft.Azure.Documents.Client;
+using Microsoft.Extensions.Logging;
 
 namespace AzureFunctionsTodo
 {
 
     public static class TodoApiCosmosDb
     {
-        private const string route = "todo4";
+        private const string Route = "cosmostodo";
+        private const string DatabaseName = "tododb";
+        private const string CollectionName = "tasks";
 
         [FunctionName("CosmosDb_CreateTodo")]
         public static async Task<IActionResult>CreateTodo(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = route)]HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = Route)]HttpRequest req,
             [CosmosDB(
-                databaseName: "tododb",
-                collectionName: "tasks",
+                DatabaseName,
+                CollectionName,
                 ConnectionStringSetting = "CosmosDBConnection")]
-            IAsyncCollector<object> todos, TraceWriter log)
+            IAsyncCollector<object> todos, ILogger log)
         {
-            log.Info("Creating a new todo list item");
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            log.LogInformation("Creating a new todo list item");
+            var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var input = JsonConvert.DeserializeObject<TodoCreateModel>(requestBody);
 
             var todo = new Todo() { TaskDescription = input.TaskDescription };
@@ -40,31 +42,31 @@ namespace AzureFunctionsTodo
 
         [FunctionName("CosmosDb_GetTodos")]
         public static IActionResult GetTodos(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = route)]HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Route)]HttpRequest req,
             [CosmosDB(
-                databaseName: "tododb",
-                collectionName: "tasks",
+                DatabaseName,
+                CollectionName,
                 ConnectionStringSetting = "CosmosDBConnection",
                 SqlQuery = "SELECT * FROM c order by c._ts desc")]
                 IEnumerable<Todo> todos,
-            TraceWriter log)
+            ILogger log)
         {
-            log.Info("Getting todo list items");
+            log.LogInformation("Getting todo list items");
             return new OkObjectResult(todos);
         }
 
         [FunctionName("CosmosDb_GetTodoById")]
         public static IActionResult GetTodoById(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = route + "/{id}")]HttpRequest req,
-            [CosmosDB(databaseName: "tododb", collectionName: "tasks", ConnectionStringSetting = "CosmosDBConnection",
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Route + "/{id}")]HttpRequest req,
+            [CosmosDB(DatabaseName, CollectionName, ConnectionStringSetting = "CosmosDBConnection",
                 Id = "{id}")] Todo todo,
-            TraceWriter log, string id)
+            ILogger log, string id)
         {
-            log.Info("Getting todo item by id");
+            log.LogInformation("Getting todo item by id");
 
             if (todo == null)
             {
-                log.Info($"Item {id} not found");
+                log.LogInformation($"Item {id} not found");
                 return new NotFoundResult();
             }
             return new OkObjectResult(todo);
@@ -72,14 +74,14 @@ namespace AzureFunctionsTodo
 
         [FunctionName("CosmosDb_UpdateTodo")]
         public static async Task<IActionResult> UpdateTodo(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = route + "/{id}")]HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = Route + "/{id}")]HttpRequest req,
             [CosmosDB(ConnectionStringSetting = "CosmosDBConnection")]
                 DocumentClient client,
-            TraceWriter log, string id)
+            ILogger log, string id)
         {
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var updated = JsonConvert.DeserializeObject<TodoUpdateModel>(requestBody);
-            Uri collectionUri = UriFactory.CreateDocumentCollectionUri("tododb", "tasks");
+            Uri collectionUri = UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName);
             var document = client.CreateDocumentQuery(collectionUri).Where(t => t.Id == id)
                             .AsEnumerable().FirstOrDefault();
             if (document == null)
@@ -105,18 +107,18 @@ namespace AzureFunctionsTodo
             };*/
 
             // an easier way to deserialize a Document
-            Todo todo2 = (dynamic)document;
+            Todo todo = (dynamic)document;
 
-            return new OkObjectResult(todo2);
+            return new OkObjectResult(todo);
         }
 
         [FunctionName("CosmosDb_DeleteTodo")]
         public static async Task<IActionResult> DeleteTodo(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = route + "/{id}")]HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = Route + "/{id}")]HttpRequest req,
             [CosmosDB(ConnectionStringSetting = "CosmosDBConnection")] DocumentClient client,
-            TraceWriter log, string id)
+            ILogger log, string id)
         {
-            Uri collectionUri = UriFactory.CreateDocumentCollectionUri("tododb", "tasks");
+            Uri collectionUri = UriFactory.CreateDocumentCollectionUri(DatabaseName, CollectionName);
             var document = client.CreateDocumentQuery(collectionUri).Where(t => t.Id == id)
                     .AsEnumerable().FirstOrDefault();
             if (document == null)
