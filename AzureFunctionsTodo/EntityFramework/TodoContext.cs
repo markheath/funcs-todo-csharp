@@ -1,5 +1,4 @@
-﻿using AzureFunctionsTodo.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace AzureFunctionsTodo.EntityFramework
 {
@@ -12,6 +11,6 @@ namespace AzureFunctionsTodo.EntityFramework
             : base(options)
         { }
 
-        public DbSet<Todo> Todos { get; set; }
+        public DbSet<TodoEf> Todos { get; set; }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using AzureFunctionsTodo.Models;
@@ -30,7 +31,7 @@ namespace AzureFunctionsTodo.EntityFramework
             log.LogInformation("Creating a new todo list item");
             var requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var input = JsonConvert.DeserializeObject<TodoCreateModel>(requestBody);
-            var todo = new Todo { TaskDescription = input.TaskDescription };
+            var todo = new TodoEf { TaskDescription = input.TaskDescription };
             await todoContext.Todos.AddAsync(todo);
             await todoContext.SaveChangesAsync();
             return new OkObjectResult(todo);
@@ -52,7 +53,7 @@ namespace AzureFunctionsTodo.EntityFramework
             ILogger log, string id)
         {
             log.LogInformation("Getting todo item by id");
-            var todo = await todoContext.Todos.FindAsync(id);
+            var todo = await todoContext.Todos.FindAsync(Guid.Parse(id));
             if (todo == null)
             {
                 log.LogInformation($"Item {id} not found");
@@ -68,7 +69,7 @@ namespace AzureFunctionsTodo.EntityFramework
         {
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var updated = JsonConvert.DeserializeObject<TodoUpdateModel>(requestBody);
-            var todo = await todoContext.Todos.FindAsync(id);
+            var todo = await todoContext.Todos.FindAsync(Guid.Parse(id));
             if (todo == null)
             {
                 log.LogWarning($"Item {id} not found");
@@ -91,7 +92,7 @@ namespace AzureFunctionsTodo.EntityFramework
             [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = Route + "/{id}")]HttpRequest req,
             ILogger log, string id)
         {
-            var todo = await todoContext.Todos.FindAsync(id);
+            var todo = await todoContext.Todos.FindAsync(Guid.Parse(id));
             if (todo == null)
             {
                 log.LogWarning($"Item {id} not found");
