@@ -1,16 +1,18 @@
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using AzureFunctionsTodo.EntityFramework;
+using AzureFunctionsTodo.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-using System.Threading.Tasks;
-using System.Linq;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Table;
+using Newtonsoft.Json;
 
-namespace AzureFunctionsTodo
+namespace AzureFunctionsTodo.TableStorage
 {
 
     public static class TodoApiTableStorage

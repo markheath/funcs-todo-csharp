@@ -1,17 +1,17 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using AzureFunctionsTodo.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
-namespace AzureFunctionsTodo
+namespace AzureFunctionsTodo.InMemory
 {
-
     public static class TodoApiInMemory
     {
         private static readonly List<Todo> Items = new List<Todo>();

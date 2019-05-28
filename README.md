@@ -10,7 +10,7 @@ A simple CRUD (Create, Read, Update, Delete) API is created to manage TODO items
 It's implemented using Azure Functions V2 in C#, and can be run against the local storage emulator for table storage, and the CosmosDb emulator.
 
 
-You'll need to set up a `local.settings.json` file containing connection strings for the Azure Storage and Azure CosmosDb emulators
+You'll need to set up a `local.settings.json` file containing connection strings for the Azure Storage and Azure CosmosDb emulators. 
 
 ```js
 {
