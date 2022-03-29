@@ -5,6 +5,8 @@ function Make-RestCall() {
     -ContentType "application/json"
 }
 
+Write-Host "Testing with $prefix"
+
 # add TODO item
 $createModel = @{ TaskDescription="First task"}
 $body = $createModel | ConvertTo-Json

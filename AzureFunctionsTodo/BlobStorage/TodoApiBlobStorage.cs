@@ -2,13 +2,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure.Storage.Blobs;
 using AzureFunctionsTodo.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.WindowsAzure.Storage.Blob;
 using Newtonsoft.Json;
 
 namespace AzureFunctionsTodo.BlobStorage
@@ -21,7 +21,7 @@ namespace AzureFunctionsTodo.BlobStorage
         [FunctionName("Blob_CreateTodo")]
         public static async Task<IActionResult>CreateTodo(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = Route)]HttpRequest req, 
-            [Blob(BlobPath, Connection="AzureWebJobsStorage")] CloudBlobContainer todoContainer,
+            [Blob(BlobPath, Connection="AzureWebJobsStorage")] BlobContainerClient todoContainer,
             ILogger log)
         {
             log.LogInformation("Creating a new todo list item");
@@ -30,7 +30,7 @@ namespace AzureFunctionsTodo.BlobStorage
             var input = JsonConvert.DeserializeObject<TodoCreateModel>(requestBody);
             var todo = new Todo() { TaskDescription = input.TaskDescription };
 
-            var blob = todoContainer.GetBlockBlobReference($"{todo.Id}.json");
+            var blob = todoContainer.GetBlobClient($"{todo.Id}.json");
             await blob.UploadTextAsync(JsonConvert.SerializeObject(todo));
 
             return new OkObjectResult(todo);
@@ -39,17 +39,16 @@ namespace AzureFunctionsTodo.BlobStorage
         [FunctionName("Blob_GetTodos")]
         public static async Task<IActionResult> GetTodos(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Route)]HttpRequest req,
-            [Blob(BlobPath, Connection = "AzureWebJobsStorage")] CloudBlobContainer todoContainer, 
+            [Blob(BlobPath, Connection = "AzureWebJobsStorage")] BlobContainerClient todoContainer, 
             ILogger log)
         {
             log.LogInformation("Getting todo list items");
             await todoContainer.CreateIfNotExistsAsync();
-            var segment = await todoContainer.ListBlobsSegmentedAsync(null);
 
             var todos = new List<Todo>();
-            foreach(var result in segment.Results)
+            await foreach(var result in todoContainer.GetBlobsAsync())
             {
-                var blob = todoContainer.GetBlockBlobReference(result.Uri.Segments.Last());
+                var blob = todoContainer.GetBlobClient(result.Name);
                 var json  = await blob.DownloadTextAsync();
                 todos.Add(JsonConvert.DeserializeObject<Todo>(json));
             }
@@ -74,7 +73,7 @@ namespace AzureFunctionsTodo.BlobStorage
         [FunctionName("Blob_UpdateTodo")]
         public static async Task<IActionResult> UpdateTodo(
             [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = Route + "/{id}")]HttpRequest req,
-            [Blob(BlobPath + "/{id}.json", Connection = "AzureWebJobsStorage")] CloudBlockBlob blob,
+            [Blob(BlobPath + "/{id}.json", Connection = "AzureWebJobsStorage")] BlobClient blob,
             ILogger log, string id)
         {
 
@@ -102,7 +101,7 @@ namespace AzureFunctionsTodo.BlobStorage
         [FunctionName("Blob_DeleteTodo")]
         public static async Task<IActionResult> DeleteTodo(
             [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = Route + "/{id}")]HttpRequest req,
-            [Blob(BlobPath + "/{id}.json", Connection = "AzureWebJobsStorage")] CloudBlockBlob blob,
+            [Blob(BlobPath + "/{id}.json", Connection = "AzureWebJobsStorage")] BlobClient blob,
             ILogger log, string id)
         {
             if(!await blob.ExistsAsync())

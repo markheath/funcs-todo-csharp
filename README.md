@@ -8,7 +8,7 @@ This project contains a simple CRUD (Create, Read, Update, Delete) REST API to m
 - Cosmos DB
 - Entity Framework Core
 
-It's implemented using Azure Functions V2 in C#, and can be run against the local storage emulator for Table or Blob storage, and the Cosmos DB emulator.
+It's implemented using Azure Functions V4 in C#, and can be run against the local storage emulator for Table or Blob storage, and the Cosmos DB emulator.
 
 ### Get set up
 
@@ -27,7 +27,9 @@ You'll need to set up a `local.settings.json` file containing connection strings
 }
 ```
 
-To test the EF backing store, create a new `Todos` database and then run the `TodoTable.sql` SQL script against it to create the necessary table.
+To test Cosmos, in the cosmos DB emulator, create a database called `tododb`, with a collection called `tasks` and a partition key of `/id`
+
+To test the EF backing store, create a new `Todos` database and then run the `TodoTable.sql` SQL script against it to create the necessary table. (using SQL Server Object Explorer in Visual Studio is probably easiest)
 
 ### Testing Locally
 
