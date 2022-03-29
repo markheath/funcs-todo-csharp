@@ -1,8 +1,7 @@
-﻿namespace AzureFunctionsTodo.Models
+﻿namespace AzureFunctionsTodo.Models;
+
+public class TodoUpdateModel
 {
-    public class TodoUpdateModel
-    {
-        public string TaskDescription { get; set; }
-        public bool IsCompleted { get; set; }
-    }
+    public string TaskDescription { get; set; }
+    public bool IsCompleted { get; set; }
 }

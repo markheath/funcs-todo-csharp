@@ -6,16 +6,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 [assembly: FunctionsStartup(typeof(AzureFunctionsTodo.Startup))]
 
-namespace AzureFunctionsTodo
-{
+namespace AzureFunctionsTodo;
 
-    class Startup : FunctionsStartup
+class Startup : FunctionsStartup
+{
+    public override void Configure(IFunctionsHostBuilder builder)
     {
-        public override void Configure(IFunctionsHostBuilder builder)
-        {
-            string connectionString = Environment.GetEnvironmentVariable("SqlConnectionString");
-            builder.Services.AddDbContext<TodoContext>(
-                options => SqlServerDbContextOptionsExtensions.UseSqlServer(options, connectionString));
-        }
+        string connectionString = Environment.GetEnvironmentVariable("SqlConnectionString");
+        builder.Services.AddDbContext<TodoContext>(
+            options => SqlServerDbContextOptionsExtensions.UseSqlServer(options, connectionString));
     }
 }

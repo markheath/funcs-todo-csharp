@@ -10,79 +10,78 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
-namespace AzureFunctionsTodo.InMemory
+namespace AzureFunctionsTodo.InMemory;
+
+public static class TodoApiInMemory
 {
-    public static class TodoApiInMemory
+    private static readonly List<Todo> Items = new List<Todo>();
+    private const string Route = "memorytodo";
+
+    [FunctionName("InMemory_CreateTodo")]
+    public static async Task<IActionResult> CreateTodo(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = Route)] HttpRequest req, ILogger log)
     {
-        private static readonly List<Todo> Items = new List<Todo>();
-        private const string Route = "memorytodo";
+        log.LogInformation("Creating a new todo list item");
+        string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+        var input = JsonConvert.DeserializeObject<TodoCreateModel>(requestBody);
 
-        [FunctionName("InMemory_CreateTodo")]
-        public static async Task<IActionResult>CreateTodo(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = Route)]HttpRequest req, ILogger log)
+        var todo = new Todo() { TaskDescription = input.TaskDescription };
+        Items.Add(todo);
+        return new OkObjectResult(todo);
+    }
+
+    [FunctionName("InMemory_GetTodos")]
+    public static IActionResult GetTodos(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Route)] HttpRequest req, ILogger log)
+    {
+        log.LogInformation("Getting todo list items");
+        return new OkObjectResult(Items);
+    }
+
+    [FunctionName("InMemory_GetTodoById")]
+    public static IActionResult GetTodoById(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Route + "/{id}")] HttpRequest req, ILogger log, string id)
+    {
+        var todo = Items.FirstOrDefault(t => t.Id == id);
+        if (todo == null)
         {
-            log.LogInformation("Creating a new todo list item");
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var input = JsonConvert.DeserializeObject<TodoCreateModel>(requestBody);
+            return new NotFoundResult();
+        }
+        return new OkObjectResult(todo);
+    }
 
-            var todo = new Todo() { TaskDescription = input.TaskDescription };
-            Items.Add(todo);
-            return new OkObjectResult(todo);
+    [FunctionName("InMemory_UpdateTodo")]
+    public static async Task<IActionResult> UpdateTodo(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = Route + "/{id}")] HttpRequest req, ILogger log, string id)
+    {
+        var todo = Items.FirstOrDefault(t => t.Id == id);
+        if (todo == null)
+        {
+            return new NotFoundResult();
         }
 
-        [FunctionName("InMemory_GetTodos")]
-        public static IActionResult GetTodos(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Route)]HttpRequest req, ILogger log)
+        string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+        var updated = JsonConvert.DeserializeObject<TodoUpdateModel>(requestBody);
+
+        todo.IsCompleted = updated.IsCompleted;
+        if (!string.IsNullOrEmpty(updated.TaskDescription))
         {
-            log.LogInformation("Getting todo list items");
-            return new OkObjectResult(Items);
+            todo.TaskDescription = updated.TaskDescription;
         }
 
-        [FunctionName("InMemory_GetTodoById")]
-        public static IActionResult GetTodoById(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Route + "/{id}")]HttpRequest req, ILogger log, string id)
+        return new OkObjectResult(todo);
+    }
+
+    [FunctionName("InMemory_DeleteTodo")]
+    public static IActionResult DeleteTodo(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = Route + "/{id}")] HttpRequest req, ILogger log, string id)
+    {
+        var todo = Items.FirstOrDefault(t => t.Id == id);
+        if (todo == null)
         {
-            var todo = Items.FirstOrDefault(t => t.Id == id);
-            if (todo == null)
-            {
-                return new NotFoundResult();
-            }
-            return new OkObjectResult(todo);
+            return new NotFoundResult();
         }
-
-        [FunctionName("InMemory_UpdateTodo")]
-        public static async Task<IActionResult> UpdateTodo(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = Route + "/{id}")]HttpRequest req, ILogger log, string id)
-        {
-            var todo = Items.FirstOrDefault(t => t.Id == id);
-            if (todo == null)
-            {
-                return new NotFoundResult();
-            }
-
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var updated = JsonConvert.DeserializeObject<TodoUpdateModel>(requestBody);
-
-            todo.IsCompleted = updated.IsCompleted;
-            if (!string.IsNullOrEmpty(updated.TaskDescription))
-            {
-                todo.TaskDescription = updated.TaskDescription;
-            }
-
-            return new OkObjectResult(todo);
-        }
-
-        [FunctionName("InMemory_DeleteTodo")]
-        public static IActionResult DeleteTodo(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = Route + "/{id}")]HttpRequest req, ILogger log, string id)
-        {
-            var todo = Items.FirstOrDefault(t => t.Id == id);
-            if (todo == null)
-            {
-                return new NotFoundResult();
-            }
-            Items.Remove(todo);
-            return new OkResult();
-        }
+        Items.Remove(todo);
+        return new OkResult();
     }
 }

@@ -1,7 +1,6 @@
-﻿namespace AzureFunctionsTodo.Models
+﻿namespace AzureFunctionsTodo.Models;
+
+public class TodoCreateModel
 {
-    public class TodoCreateModel
-    {
-        public string TaskDescription { get; set; }
-    }
+    public string TaskDescription { get; set; }
 }

@@ -2,7 +2,7 @@
 using Azure.Data.Tables;
 using System;
 
-namespace AzureFunctionsTodo.EntityFramework
+namespace AzureFunctionsTodo.TableStorage
 {
     public class TodoTableEntity : BaseTableEntity
     {
