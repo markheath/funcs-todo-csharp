@@ -1,46 +1,50 @@
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using AzureFunctionsTodo.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace AzureFunctionsTodo.InMemory;
 
-public static class TodoApiInMemory
+public class TodoApiInMemory
 {
     private static readonly List<Todo> Items = new List<Todo>();
+    private readonly ILogger<TodoApiInMemory> logger;
     private const string Route = "memorytodo";
 
-    [FunctionName("InMemory_CreateTodo")]
-    public static async Task<IActionResult> CreateTodo(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = Route)] HttpRequest req, ILogger log)
+    public TodoApiInMemory(ILogger<TodoApiInMemory> logger)
     {
-        log.LogInformation("Creating a new todo list item");
+        this.logger = logger;
+    }
+
+    [Function("InMemory_CreateTodo")]
+    public async Task<IActionResult> CreateTodo(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = Route)] HttpRequest req)
+    {
+        logger.LogInformation("Creating a new todo list item");
         string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
         var input = JsonConvert.DeserializeObject<TodoCreateModel>(requestBody);
-
+        if (input == null)
+        {
+            return new BadRequestObjectResult("Failed to deserialize request body");
+        }
         var todo = new Todo() { TaskDescription = input.TaskDescription };
         Items.Add(todo);
         return new OkObjectResult(todo);
     }
 
-    [FunctionName("InMemory_GetTodos")]
-    public static IActionResult GetTodos(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Route)] HttpRequest req, ILogger log)
+    [Function("InMemory_GetTodos")]
+    public IActionResult GetTodos(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Route)] HttpRequest req)
     {
-        log.LogInformation("Getting todo list items");
+        logger.LogInformation("Getting todo list items");
         return new OkObjectResult(Items);
     }
 
-    [FunctionName("InMemory_GetTodoById")]
-    public static IActionResult GetTodoById(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Route + "/{id}")] HttpRequest req, ILogger log, string id)
+    [Function("InMemory_GetTodoById")]
+    public IActionResult GetTodoById(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = Route + "/{id}")] HttpRequest req, string id)
     {
         var todo = Items.FirstOrDefault(t => t.Id == id);
         if (todo == null)
@@ -50,9 +54,9 @@ public static class TodoApiInMemory
         return new OkObjectResult(todo);
     }
 
-    [FunctionName("InMemory_UpdateTodo")]
-    public static async Task<IActionResult> UpdateTodo(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = Route + "/{id}")] HttpRequest req, ILogger log, string id)
+    [Function("InMemory_UpdateTodo")]
+    public async Task<IActionResult> UpdateTodo(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = Route + "/{id}")] HttpRequest req, string id)
     {
         var todo = Items.FirstOrDefault(t => t.Id == id);
         if (todo == null)
@@ -62,7 +66,10 @@ public static class TodoApiInMemory
 
         string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
         var updated = JsonConvert.DeserializeObject<TodoUpdateModel>(requestBody);
-
+        if (updated == null)
+        {
+            return new BadRequestObjectResult("Failed to deserialize request body");
+        }
         todo.IsCompleted = updated.IsCompleted;
         if (!string.IsNullOrEmpty(updated.TaskDescription))
         {
@@ -72,9 +79,9 @@ public static class TodoApiInMemory
         return new OkObjectResult(todo);
     }
 
-    [FunctionName("InMemory_DeleteTodo")]
-    public static IActionResult DeleteTodo(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = Route + "/{id}")] HttpRequest req, ILogger log, string id)
+    [Function("InMemory_DeleteTodo")]
+    public IActionResult DeleteTodo(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = Route + "/{id}")] HttpRequest req, string id)
     {
         var todo = Items.FirstOrDefault(t => t.Id == id);
         if (todo == null)

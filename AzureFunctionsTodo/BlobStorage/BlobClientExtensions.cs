@@ -1,6 +1,4 @@
 ﻿using Azure.Storage.Blobs;
-using System;
-using System.Threading.Tasks;
 
 namespace AzureFunctionsTodo.BlobStorage;
 

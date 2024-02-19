@@ -2,5 +2,5 @@
 
 public class TodoCreateModel
 {
-    public string TaskDescription { get; set; }
+    public string TaskDescription { get; set; } = string.Empty;
 }

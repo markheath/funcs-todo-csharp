@@ -21,12 +21,15 @@ Invoke-RestMethod -Uri "$rootUrl/api/$($prefix)todo" -Body $body -Method Post -C
 $items = Invoke-RestMethod -Uri "$rootUrl/api/$($prefix)todo" -Method Get
 
 ForEach ($todo in $items) {
+    $taskId = $todo.Id
+
     Write-Host "Updating $($todo.Id) - $($todo.TaskDescription)"
     $updateModel = @{ IsCompleted=$true}
     $body = $updateModel | ConvertTo-Json
     Invoke-RestMethod -Uri "$rootUrl/api/$($prefix)todo/$($todo.id)" -Body $body -Method Put
 
     Write-Host "Retrieving $($todo.Id) - $($todo.TaskDescription)"
+    Write-Host "URI: $rootUrl/api/$($prefix)todo/$($todo.id)"
     Invoke-RestMethod -Uri "$rootUrl/api/$($prefix)todo/$($todo.id)" -Method Get
 
     Write-Host "Deleting $($todo.Id) - $($todo.TaskDescription)"

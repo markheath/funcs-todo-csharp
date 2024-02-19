@@ -8,7 +8,7 @@ This project contains a simple CRUD (Create, Read, Update, Delete) REST API to m
 - Cosmos DB
 - Entity Framework Core
 
-It's implemented using Azure Functions V4 in C#, and can be run against the local storage emulator for Table or Blob storage, and the Cosmos DB emulator.
+It's implemented using Azure Functions V4 in C# isolated model, and can be run against the local storage emulator for Table or Blob storage, and the Cosmos DB emulator.
 
 ### Get set up
 
@@ -20,7 +20,7 @@ You'll need to set up a `local.settings.json` file containing connection strings
   "Values": {
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "AzureWebJobsDashboard": "UseDevelopmentStorage=true",
-    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet-isolated",
     "SqlConnectionString": "Data Source=(LocalDB)\\MSSQLLocalDB;Integrated Security=true;Database=Todos",
     "CosmosDBConnection": "AccountEndpoint=https://localhost:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw=="
   }
